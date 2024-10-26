@@ -28,5 +28,5 @@ def data_cacher(method: Callable) -> Callable:
 
 @data_cacher
 def get_page(url: str) -> str:
-    ''' Returns URL content after caching request's response and tracking the request '''
+    ''' Returns HTML content of URL '''
     return requests.get(url).text
