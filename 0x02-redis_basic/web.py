@@ -10,23 +10,26 @@ store = redis.Redis()
 ''' Redis instance '''
 
 
-def data_cacher(method: Callable) -> Callable:
-    ''' Caches output of fetched data '''
+def count_access(method):
+    """ Decorator counts URL access times """
     @wraps(method)
-    def invoke(url) -> str:
-        ''' wrapper function '''
-        store.incr(f'count:{url}')
-        result = store.get(f'result:{url}')
-        if result:
-            return result.decode('utf-8')
-        result = method(url)
-        store.set(f'count:{url}', 0)
-        store.setex(f'result:{url}', 10, result)
-        return result
-    return invoke
+    def wrapper(url):
+        key = "cached:" + url
+        data = store.get(key)
+        if data:
+            return data.decode("utf-8")
+
+        key = "count:" + url
+        html = method(url)
+
+        store.incr(key)
+        store.set(key, html)
+        store.expire(key, 10)
+        return html
+    return wrapper
 
 
-@data_cacher
+@count_access
 def get_page(url: str) -> str:
     ''' Returns HTML content of URL '''
     return requests.get(url).text
