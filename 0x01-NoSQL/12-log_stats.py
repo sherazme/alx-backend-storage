@@ -1,29 +1,25 @@
-#!/usr/bin/env python3
-"""task 12 """
 from pymongo import MongoClient
+from collections import Counter
 
 
-METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
+''' Connect to MongoDB '''
+client = MongoClient("mongodb://localhost:27017/")
+db = client['logs']
+collection = db['nginx']
 
+''' Query all logs '''
+logs = collection.find()
 
-def log_stats(mongo_collection, option=None):
-    """ script that provides some stats about Nginx logs stored in MongoD """
-    items = {}
-    if option:
-        value = mongo_collection.count_documents(
-            {"method": {"$regex": option}})
-        print(f"\tmethod {option}: {value}")
-        return
+''' Extract IPs from logs '''
+ips = [log['ip'] for log in logs if 'ip' in log]
 
-    result = mongo_collection.count_documents(items)
-    print(f"{result} logs")
-    print("Methods:")
-    for method in METHODS:
-        log_stats(nginx_collection, method)
-    status_check = mongo_collection.count_documents({"path": "/status"})
-    print(f"{status_check} status check")
+''' Count occurrences of each IP '''
+ip_counter = Counter(ips)
 
+''' Get the top 10 most common IPs '''
+top_ips = ip_counter.most_common(10)
 
-if __name__ == "__main__":
-    nginx_collection = MongoClient('mongodb://127.0.0.1:27017').logs.nginx
-    log_stats(nginx_collection)
+''' Print the results '''
+print("Top 10 IPs:")
+for ip, count in top_ips:
+    print(f"{ip}: {count}")
