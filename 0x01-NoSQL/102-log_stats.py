@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+''' task 15 '''
 
 from pymongo import MongoClient
 from collections import Counter
+
 
 def connect_to_mongo(uri="mongodb://localhost:27017/"):
     '''
@@ -15,6 +17,7 @@ def connect_to_mongo(uri="mongodb://localhost:27017/"):
     '''
     return MongoClient(uri)
 
+
 def fetch_logs(collection):
     '''
     Fetches all logs from the specified MongoDB collection.
@@ -26,6 +29,7 @@ def fetch_logs(collection):
         list: A list of logs.
     '''
     return collection.find()
+
 
 def extract_ips(logs):
     '''
@@ -39,6 +43,7 @@ def extract_ips(logs):
     '''
     return [log['ip'] for log in logs if 'ip' in log]
 
+
 def count_ips(ips):
     '''
     Counts the occurrences of each IP address.
@@ -50,6 +55,7 @@ def count_ips(ips):
         Counter: A Counter object with IP counts.
     '''
     return Counter(ips)
+
 
 def get_top_ips(ip_counter, top_n=10):
     '''
@@ -63,6 +69,7 @@ def get_top_ips(ip_counter, top_n=10):
         list: A list of tuples containing top IPs and their counts.
     '''
     return ip_counter.most_common(top_n)
+
 
 def main():
     """
